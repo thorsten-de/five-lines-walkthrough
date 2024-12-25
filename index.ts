@@ -139,7 +139,10 @@ function draw() {
     }
   }
 
-  // Draw player
+  drawPlayer(g);
+}
+
+function drawPlayer(g: CanvasRenderingContext2D) {
   g.fillStyle = "#ff0000";
   g.fillRect(playerx * TILE_SIZE, playery * TILE_SIZE, TILE_SIZE, TILE_SIZE);
 }
