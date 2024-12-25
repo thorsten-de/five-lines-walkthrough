@@ -81,18 +81,11 @@ function moveVertical(dy: number) {
 }
 
 function update() {
-  while (inputs.length > 0) {
-    let current = inputs.pop();
-    if (current === Input.LEFT)
-      moveHorizontal(-1);
-    else if (current === Input.RIGHT)
-      moveHorizontal(1);
-    else if (current === Input.UP)
-      moveVertical(-1);
-    else if (current === Input.DOWN)
-      moveVertical(1);
-  }
+  handleInputs();
+  updateMap();
+}
 
+function updateMap() {
   for (let y = map.length - 1; y >= 0; y--) {
     for (let x = 0; x < map[y].length; x++) {
       if ((map[y][x] === Tile.STONE || map[y][x] === Tile.FALLING_STONE)
@@ -109,6 +102,20 @@ function update() {
         map[y][x] = Tile.BOX;
       }
     }
+  }
+}
+
+function handleInputs() {
+  while (inputs.length > 0) {
+    let current = inputs.pop();
+    if (current === Input.LEFT)
+      moveHorizontal(-1);
+    else if (current === Input.RIGHT)
+      moveHorizontal(1);
+    else if (current === Input.UP)
+      moveVertical(-1);
+    else if (current === Input.DOWN)
+      moveVertical(1);
   }
 }
 
