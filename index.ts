@@ -28,17 +28,12 @@ abstract class Tile {
   isLock1(): boolean { return false; }
   isLock2(): boolean { return false; }
 
-  isEdible(): boolean { return false; }
-  isPushable(): boolean { return false; }
-  
   abstract moveHorizontal(dx: number): void;
 }
 
 class Air extends Tile {
   isAir() { return true; }
-  isEdible(): boolean {
-    return true;
-  }
+
   moveHorizontal(dx: number) {
     moveToTile(playerx + dx, playery);
   }
@@ -46,10 +41,8 @@ class Air extends Tile {
 
 class Flux extends Tile {
   isFlux() { return true ; }
-  isEdible(): boolean {
-    return true;
-  }
-   moveHorizontal(dx: number) {
+  
+  moveHorizontal(dx: number) {
     moveToTile(playerx + dx, playery);
   }
 }
@@ -68,10 +61,7 @@ class Player extends Tile {
 
 class Stone extends Tile {
   isStone() { return true; }
-  isPushable(): boolean {
-    return true;
-  }
-
+ 
   moveHorizontal(dx: number) {
     if (map[playery][playerx + dx + dx].isAir()
           && !map[playery + 1][playerx + dx].isAir()) {
@@ -91,9 +81,6 @@ class FallingStone extends Tile {
 
 class Box extends Tile {
   isBox(): boolean {
-    return true;
-  }
-  isPushable(): boolean {
     return true;
   }
 
@@ -157,53 +144,28 @@ enum RawInput {
 }
 
 interface Input {
-  isRight(): boolean;
-  isLeft(): boolean;
-  isUp(): boolean;
-  isDown(): boolean;
-
   handle(): void;
 }
 
 class Right implements Input {
-  isRight(): boolean { return true; }
-  isLeft(): boolean { return false; }
-  isUp(): boolean { return false; }
-  isDown(): boolean { return false; }
-  
   handle() {
     moveHorizontal(1);
   }
 }
 
 class Left implements Input {
-  isRight(): boolean { return false; }
-  isLeft(): boolean { return true; }
-  isUp(): boolean { return false; }
-  isDown(): boolean { return false; }
-  
   handle() {
     moveHorizontal(-1);
   }
 }
 
 class Up implements Input {
-  isRight(): boolean { return false; }
-  isLeft(): boolean { return false; }
-  isUp(): boolean { return true; }
-  isDown(): boolean { return false; }
-  
   handle() {
     moveVertical(-1);
   }
 }
 
 class Down implements Input {
-  isRight(): boolean { return false; }
-  isLeft(): boolean { return false; }
-  isUp(): boolean { return false; }
-  isDown(): boolean { return true; }
-  
   handle() {
     moveVertical(1);
   }
