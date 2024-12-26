@@ -15,7 +15,6 @@ enum RawTile {
 }
 
 abstract class Tile {
-  isPushable(): boolean { return false; }
   isAir():boolean { return false; }
   isFlux(): boolean { return false; }
   isUnbreakable(): boolean { return false; }
@@ -30,12 +29,18 @@ abstract class Tile {
   isLock2(): boolean { return false; }
 
   isEdible(): boolean { return false; }
+  isPushable(): boolean { return false; }
+  
+  abstract moveHorizontal(dx: number): void;
 }
 
 class Air extends Tile {
   isAir() { return true; }
   isEdible(): boolean {
     return true;
+  }
+  moveHorizontal(dx: number) {
+    moveToTile(playerx + dx, playery);
   }
 }
 
@@ -44,14 +49,21 @@ class Flux extends Tile {
   isEdible(): boolean {
     return true;
   }
+   moveHorizontal(dx: number) {
+    moveToTile(playerx + dx, playery);
+  }
 }
 
 class Unbreakable extends Tile {
   isUnbreakable() { return true; } 
+
+  moveHorizontal(dx: number) {}
 }
 
 class Player extends Tile {
   isPlayer() { return true; }
+
+  moveHorizontal(dx: number) {}
 }
 
 class Stone extends Tile {
@@ -59,12 +71,22 @@ class Stone extends Tile {
   isPushable(): boolean {
     return true;
   }
+
+  moveHorizontal(dx: number) {
+    if (map[playery][playerx + dx + dx].isAir()
+          && !map[playery + 1][playerx + dx].isAir()) {
+      map[playery][playerx + dx + dx] = map[playery][playerx + dx];
+      moveToTile(playerx + dx, playery);
+    }
+  }
 }
 
 class FallingStone extends Tile {
   isFallingStone(): boolean {
     return true;
   }
+
+  moveHorizontal(dx: number): void { }
 }
 
 class Box extends Tile {
@@ -74,17 +96,32 @@ class Box extends Tile {
   isPushable(): boolean {
     return true;
   }
+
+  moveHorizontal(dx: number) {
+    if (map[playery][playerx + dx + dx].isAir()
+        && !map[playery + 1][playerx + dx].isAir()) {
+      map[playery][playerx + dx + dx] = map[playery][playerx + dx];
+      moveToTile(playerx + dx, playery);
+    }
+  }
 }
 
 class FallingBox extends Tile {
   isFallingBox(): boolean {
     return true;
   }
+
+  moveHorizontal(dx: number) { }
 }
 
 class Key1 extends Tile {
   isKey1(): boolean {
     return true;
+  }
+
+  moveHorizontal(dx: number) {
+    removeLock1();
+    moveToTile(playerx + dx, playery);
   }
 }
 
@@ -92,20 +129,28 @@ class Key2 extends Tile {
   isKey2(): boolean {
     return true;
   }
+   
+  moveHorizontal(dx: number) {
+    removeLock2();
+    moveToTile(playerx + dx, playery);
+  }
 }
 
 class Lock1 extends Tile {
   isLock1(): boolean {
     return true;
   }
+
+   moveHorizontal(dx: number) { }
 }
 
 class Lock2 extends Tile {
   isLock2(): boolean {
     return true;
   }
-}
 
+  moveHorizontal(dx: number) { }
+}
 
 enum RawInput {
   UP, DOWN, LEFT, RIGHT
@@ -233,20 +278,7 @@ function moveToTile(newx: number, newy: number) {
 }
 
 function moveHorizontal(dx: number) {
-  if (map[playery][playerx + dx].isEdible()) {
-    moveToTile(playerx + dx, playery);
-  } else if ((map[playery][playerx + dx].isPushable())
-    && map[playery][playerx + dx + dx].isAir()
-    && !map[playery + 1][playerx + dx].isAir()) {
-    map[playery][playerx + dx + dx] = map[playery][playerx + dx];
-    moveToTile(playerx + dx, playery);
-  } else if (map[playery][playerx + dx].isKey1()) {
-    removeLock1();
-    moveToTile(playerx + dx, playery);
-  } else if (map[playery][playerx + dx].isKey2()) {
-    removeLock2();
-    moveToTile(playerx + dx, playery);
-  }
+  map[playery][playerx + dx].moveHorizontal(dx);
 }
 
 function moveVertical(dy: number) {
