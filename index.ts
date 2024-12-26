@@ -166,6 +166,10 @@ function transformMap() {
   map = rawMap.map(row => row.map(transformTile));
 }
 
+function assertExhausted(x: never): never {
+  throw new Error("Unexpected object: " + x);
+}
+
 function transformTile(tile: RawTile): Tile {
   switch (tile) {
     case RawTile.AIR: return new Air();
@@ -180,6 +184,7 @@ function transformTile(tile: RawTile): Tile {
     case RawTile.KEY2: return new Key2();
     case RawTile.LOCK1: return new Lock1();
     case RawTile.LOCK2: return new Lock2();
+    default: assertExhausted(tile);
   }
 }
 
