@@ -15,6 +15,7 @@ enum RawTile {
 }
 
 abstract class Tile {
+  isPushable(): boolean { return false; }
   isAir():boolean { return false; }
   isFlux(): boolean { return false; }
   isUnbreakable(): boolean { return false; }
@@ -26,15 +27,23 @@ abstract class Tile {
   isKey1(): boolean { return false; }
   isKey2(): boolean { return false; }
   isLock1(): boolean { return false; }
-  isLock2(): boolean {return false; }
+  isLock2(): boolean { return false; }
+
+  isEdible(): boolean { return false; }
 }
 
 class Air extends Tile {
   isAir() { return true; }
+  isEdible(): boolean {
+    return true;
+  }
 }
 
 class Flux extends Tile {
   isFlux() { return true ; }
+  isEdible(): boolean {
+    return true;
+  }
 }
 
 class Unbreakable extends Tile {
@@ -47,6 +56,9 @@ class Player extends Tile {
 
 class Stone extends Tile {
   isStone() { return true; }
+  isPushable(): boolean {
+    return true;
+  }
 }
 
 class FallingStone extends Tile {
@@ -57,6 +69,9 @@ class FallingStone extends Tile {
 
 class Box extends Tile {
   isBox(): boolean {
+    return true;
+  }
+  isPushable(): boolean {
     return true;
   }
 }
@@ -218,11 +233,9 @@ function moveToTile(newx: number, newy: number) {
 }
 
 function moveHorizontal(dx: number) {
-  if (map[playery][playerx + dx].isFlux()
-    || map[playery][playerx + dx].isAir()) {
+  if (map[playery][playerx + dx].isEdible()) {
     moveToTile(playerx + dx, playery);
-  } else if ((map[playery][playerx + dx].isStone()
-    || map[playery][playerx + dx].isBox())
+  } else if ((map[playery][playerx + dx].isPushable())
     && map[playery][playerx + dx + dx].isAir()
     && !map[playery + 1][playerx + dx].isAir()) {
     map[playery][playerx + dx + dx] = map[playery][playerx + dx];
