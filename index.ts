@@ -22,7 +22,9 @@ interface Input {
   isRight(): boolean;
   isLeft(): boolean;
   isUp(): boolean;
-  isDown(): boolean;  
+  isDown(): boolean;
+
+  handle(): void;
 }
 
 class Right implements Input {
@@ -31,7 +33,7 @@ class Right implements Input {
   isUp(): boolean { return false; }
   isDown(): boolean { return false; }
   
-  handleInput() {
+  handle() {
     if (this.isLeft())
       moveHorizontal(-1);
     else if (this.isRight())
@@ -49,7 +51,7 @@ class Left implements Input {
   isUp(): boolean { return false; }
   isDown(): boolean { return false; }
   
-  handleInput() {
+  handle() {
     if (this.isLeft())
       moveHorizontal(-1);
     else if (this.isRight())
@@ -67,7 +69,7 @@ class Up implements Input {
   isUp(): boolean { return true; }
   isDown(): boolean { return false; }
   
-  handleInput() {
+  handle() {
     if (this.isLeft())
       moveHorizontal(-1);
     else if (this.isRight())
@@ -85,7 +87,7 @@ class Down implements Input {
   isUp(): boolean { return false; }
   isDown(): boolean { return true; }
   
-  handleInput() {
+  handle() {
     if (this.isLeft())
       moveHorizontal(-1);
     else if (this.isRight())
