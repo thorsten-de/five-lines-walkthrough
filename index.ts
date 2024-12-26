@@ -15,7 +15,7 @@ enum Tile {
 }
 
 abstract class Tile2 {
-  isAir(): boolean { return false; }
+  isAir():boolean { return false; }
   isFlux(): boolean { return false; }
   isUnbreakable(): boolean { return false; }
   isPlayer(): boolean { return false; }
@@ -29,6 +29,67 @@ abstract class Tile2 {
   isLock2(): boolean {return false; }
 }
 
+class Air extends Tile2 {
+  isAir() { return true; }
+}
+
+class Flux extends Tile2 {
+  isFLux() { return true ; }
+}
+
+class Unbreakable extends Tile2 {
+  isUnbreakable() { return true; } 
+}
+
+class Player extends Tile2 {
+  isPlayer() { return true; }
+}
+
+class Stone extends Tile2 {
+  isStone() { return true; }
+}
+
+class FallingStone extends Tile2 {
+  isFallingStone(): boolean {
+    return true;
+  }
+}
+
+class Box extends Tile2 {
+  isFallingBox(): boolean {
+    return false;
+  }
+}
+
+class FallingBox extends Tile2 {
+  isFallingBox(): boolean {
+    return true;
+  }
+}
+
+class Key1 extends Tile2 {
+  isKey1(): boolean {
+    return true;
+  }
+}
+
+class Key2 extends Tile2 {
+  isKey2(): boolean {
+    return true;
+  }
+}
+
+class Lock1 extends Tile2 {
+  isLock1(): boolean {
+    return true;
+  }
+}
+
+class Lock2 extends Tile2 {
+  isLock2(): boolean {
+    return true;
+  }
+}
 
 
 enum RawInput {
