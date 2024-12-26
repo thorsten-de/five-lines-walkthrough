@@ -18,6 +18,13 @@ enum Input {
   UP, DOWN, LEFT, RIGHT
 }
 
+interface Input2 {
+  isRight(): boolean;
+  isLeft(): boolean;
+  isUp(): boolean;
+  isDown(): boolean;  
+}
+
 let playerx = 1;
 let playery = 1;
 let map: Tile[][] = [
