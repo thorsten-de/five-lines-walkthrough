@@ -14,7 +14,7 @@ enum RawTile {
   KEY2, LOCK2
 }
 
-abstract class Tile2 {
+abstract class Tile {
   isAir():boolean { return false; }
   isFlux(): boolean { return false; }
   isUnbreakable(): boolean { return false; }
@@ -29,63 +29,63 @@ abstract class Tile2 {
   isLock2(): boolean {return false; }
 }
 
-class Air extends Tile2 {
+class Air extends Tile {
   isAir() { return true; }
 }
 
-class Flux extends Tile2 {
+class Flux extends Tile {
   isFlux() { return true ; }
 }
 
-class Unbreakable extends Tile2 {
+class Unbreakable extends Tile {
   isUnbreakable() { return true; } 
 }
 
-class Player extends Tile2 {
+class Player extends Tile {
   isPlayer() { return true; }
 }
 
-class Stone extends Tile2 {
+class Stone extends Tile {
   isStone() { return true; }
 }
 
-class FallingStone extends Tile2 {
+class FallingStone extends Tile {
   isFallingStone(): boolean {
     return true;
   }
 }
 
-class Box extends Tile2 {
-  isFallingBox(): boolean {
-    return false;
+class Box extends Tile {
+  isBox(): boolean {
+    return true;
   }
 }
 
-class FallingBox extends Tile2 {
+class FallingBox extends Tile {
   isFallingBox(): boolean {
     return true;
   }
 }
 
-class Key1 extends Tile2 {
+class Key1 extends Tile {
   isKey1(): boolean {
     return true;
   }
 }
 
-class Key2 extends Tile2 {
+class Key2 extends Tile {
   isKey2(): boolean {
     return true;
   }
 }
 
-class Lock1 extends Tile2 {
+class Lock1 extends Tile {
   isLock1(): boolean {
     return true;
   }
 }
 
-class Lock2 extends Tile2 {
+class Lock2 extends Tile {
   isLock2(): boolean {
     return true;
   }
@@ -151,7 +151,7 @@ class Down implements Input {
 
 let playerx = 1;
 let playery = 1;
-let map: Tile[][] = [
+let rawMap: RawTile[][] = [
   [2, 2, 2, 2, 2, 2, 2, 2],
   [2, 3, 0, 1, 1, 2, 0, 2],
   [2, 4, 2, 6, 1, 2, 0, 2],
@@ -159,6 +159,29 @@ let map: Tile[][] = [
   [2, 4, 1, 1, 1, 9, 0, 2],
   [2, 2, 2, 2, 2, 2, 2, 2],
 ];
+
+let map: Tile[][];
+
+function transformMap() {
+  map = rawMap.map(row => row.map(transformTile));
+}
+
+function transformTile(tile: RawTile): Tile {
+  switch (tile) {
+    case RawTile.AIR: return new Air();
+    case RawTile.PLAYER: return new Player();
+    case RawTile.UNBREAKABLE: return new Unbreakable();
+    case RawTile.STONE: return new Stone();
+    case RawTile.FALLING_STONE: return new FallingStone();
+    case RawTile.BOX: return new Box();
+    case RawTile.FALLING_BOX: return new FallingBox();
+    case RawTile.FLUX: return new Flux();
+    case RawTile.KEY1: return new Key1();
+    case RawTile.KEY2: return new Key2();
+    case RawTile.LOCK1: return new Lock1();
+    case RawTile.LOCK2: return new Lock2();
+  }
+}
 
 let inputs: Input[] = [];
 
@@ -286,7 +309,7 @@ function colorOfTile(y: number, x: number, g: CanvasRenderingContext2D) {
     g.fillStyle = "#ccffcc";
   else if (map[y][x].isUnbreakable())
     g.fillStyle = "#999999";
-  else if (map[y][x].isStone || map[y][x].isFallingStone())
+  else if (map[y][x].isStone() || map[y][x].isFallingStone())
     g.fillStyle = "#0000cc";
   else if (map[y][x].isBox() || map[y][x].isFallingBox())
     g.fillStyle = "#8b4513";
@@ -312,6 +335,7 @@ function gameLoop() {
 }
 
 window.onload = () => {
+  transformMap();
   gameLoop();
 }
 
