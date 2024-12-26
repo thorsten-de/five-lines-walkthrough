@@ -14,7 +14,7 @@ enum Tile {
   KEY2, LOCK2
 }
 
-enum Input {
+enum RawInput {
   UP, DOWN, LEFT, RIGHT
 }
 
