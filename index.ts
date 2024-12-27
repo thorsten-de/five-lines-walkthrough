@@ -5,17 +5,14 @@ const SLEEP = 1000 / FPS;
 
 interface FallingState {
   isFalling(): boolean
-  isResting(): boolean
 }
 
 class Falling implements FallingState {
   isFalling() { return true;  }
-  isResting() { return false; }
 }
 
 class Resting implements FallingState {
   isFalling() { return false; }
-  isResting() { return true; }
 }
 
 enum RawTile {
