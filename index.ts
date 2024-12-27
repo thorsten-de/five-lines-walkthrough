@@ -72,6 +72,8 @@ class Stone extends Tile {
         moveToTile(playerx + dx, playery);
       }
     }
+    else if (this.isFallingStone() === true) {
+    }    
   }
 }
 
@@ -84,8 +86,14 @@ class FallingStone extends Tile {
   }
 
   moveHorizontal(dx: number): void {
-    if (this.isFallingStone() === true) {
-
+    if (this.isFallingStone() === false) {
+      if (map[playery][playerx + dx + dx].isAir()
+            && !map[playery + 1][playerx + dx].isAir()) {
+        map[playery][playerx + dx + dx] = map[playery][playerx + dx];
+        moveToTile(playerx + dx, playery);
+      }
+    }
+    else if (this.isFallingStone() === true) {
     }
   }
 }
