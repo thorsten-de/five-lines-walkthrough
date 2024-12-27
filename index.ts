@@ -26,6 +26,16 @@ class Resting implements FallingState {
 }
 
 class FallStrategy {
+
+  update(x: number, y: number): void {
+    if (map[y + 1][x].isAir()) {
+      this.falling = new Falling();
+      map[y+1][x] = this;
+      map[y][x] = new Air();  
+    } else if (this.falling.isFalling()) {
+      this.falling = new Resting();
+    }
+  }
 }
 
 enum RawTile {
@@ -106,15 +116,9 @@ class Stone extends Tile {
   moveHorizontal(dx: number) {
     this.falling.moveHorizontal(this, dx);
   }
-
+  
   update(x: number, y: number): void {
-    if (map[y + 1][x].isAir()) {
-      this.falling = new Falling();
-      map[y+1][x] = this;
-      map[y][x] = new Air();  
-    } else if (this.falling.isFalling()) {
-      this.falling = new Resting();
-    }
+    this.fallStrategy.update(x, y);
   }
 }
 
@@ -142,13 +146,7 @@ class Box extends Tile {
   }
 
   update(x: number, y: number): void {
-    if (map[y + 1][x].isAir()) {
-      this.falling = new Falling();
-      map[y+1][x] = this;
-      map[y][x] = new Air();  
-    } else if (this.falling.isFalling()) {
-      this.falling = new Resting();
-    }
+    this.fallStrategy.update(x, y);
   }
 }
 
