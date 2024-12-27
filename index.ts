@@ -46,6 +46,20 @@ class FallStrategy {
   }
 }
 
+interface RemoveStrategy {
+  check(tile: Tile): boolean;
+}
+
+class RemoveIdLock implements RemoveStrategy {
+  constructor(
+    private key_id: number
+  ) {}
+
+  check(tile: Tile): boolean {
+    return tile.fits(this.key_id);
+  }
+}
+
 enum RawTile {
   AIR,
   FLUX,
@@ -60,10 +74,9 @@ enum RawTile {
 abstract class Tile {
   isAir(): boolean { return false; }
   isFlux(): boolean { return false; }
-  isKey1(): boolean { return false; }
-  isKey2(): boolean { return false; }
-  isLock1(): boolean { return false; }
-  isLock2(): boolean { return false; }
+  isKey(): boolean { return false; }
+  useKey(): void { }
+  fits(key_id: number): boolean { return false; }
 
   update(x: number, y: number): void {  }
   abstract moveHorizontal(dx: number): void;
@@ -156,44 +169,53 @@ class Box extends Tile {
   }
 }
 
-class Key extends Tile {
+class KeyConfiguration {
+  private removeStrategy: RemoveStrategy;
   constructor(
     private color: string,
-    private removeStrategy: RemoveStrategy
-  )  {
+    private key_id: number,
+  ){
+    this.removeStrategy = new RemoveIdLock(key_id);
+  }
+
+  getKeyId() { return this.key_id; }
+  getColor() { return this.color; }
+  getRemoveStrategy() { return this.removeStrategy; }
+}
+
+class Key extends Tile {
+  constructor(private configuration: KeyConfiguration) {
     super();
   }
 
   moveHorizontal(dx: number) {
-    remove(this.removeStrategy);
+    this.useKey();
     moveToTile(playerx + dx, playery);
   }
   
   override draw(g: CanvasRenderingContext2D, x: number, y: number): void {
-    g.fillStyle = this.color;
+    g.fillStyle = this.configuration.getColor();
     g.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+  }
+
+  override useKey(): void {
+    remove(this.configuration.getRemoveStrategy());
   }
 }
 
 class LockTile extends Tile {
-  constructor(
-    private color: string,
-    private lock1: boolean
-  ) {
+  constructor(private configuration: KeyConfiguration) {
     super();
   }
 
-  isLock1(): boolean {
-    return this.lock1;
-  }
-  isLock2(): boolean {
-    return !this.lock1;
+  fits(key_id: number): boolean {
+    return this.configuration.getKeyId() === key_id;
   }
 
   moveHorizontal(dx: number) { }
   
   override draw(g: CanvasRenderingContext2D, x: number, y: number): void {
-    g.fillStyle = this.color;
+    g.fillStyle = this.configuration.getColor();
     g.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
   }
 }
@@ -251,6 +273,9 @@ function assertExhausted(x: never): never {
   throw new Error("Unexpected object: " + x);
 }
 
+const YELLOW_KEY = new KeyConfiguration("#ffcc00", 1);
+const OHTER_KEY = new KeyConfiguration("#00ccff", 2);
+
 function transformTile(tile: RawTile): Tile {
   switch (tile) {
     case RawTile.AIR: return new Air();
@@ -261,31 +286,15 @@ function transformTile(tile: RawTile): Tile {
     case RawTile.BOX: return new Box(new Resting());
     case RawTile.FALLING_BOX: return new Box(new Falling());
     case RawTile.FLUX: return new Flux();
-    case RawTile.KEY1: return new Key("#ffcc00", new RemoveLock1());
-    case RawTile.KEY2: return new Key("#00ccff", new RemoveLock2());
-    case RawTile.LOCK1: return new LockTile("#ffcc00", true);
-    case RawTile.LOCK2: return new LockTile("#00ccff", false);
+    case RawTile.KEY1: return new Key(YELLOW_KEY);
+    case RawTile.KEY2: return new Key(OHTER_KEY);
+    case RawTile.LOCK1: return new LockTile(YELLOW_KEY);
+    case RawTile.LOCK2: return new LockTile(OHTER_KEY);
     default: assertExhausted(tile);
   }
 }
 
 let inputs: Input[] = [];
-
-interface RemoveStrategy {
-  check(tile: Tile): boolean;
-}
-
-class RemoveLock1 implements RemoveStrategy {
-  check(tile: Tile) {
-    return tile.isLock1();
-  }
-}
-
-class RemoveLock2 implements RemoveStrategy {
-  check(tile: Tile) {
-    return tile.isLock2();
-  }
-}
 
 function remove(shouldRemove: RemoveStrategy) {
   for (let y = 0; y < map.length; y++) {
@@ -309,16 +318,15 @@ function moveHorizontal(dx: number) {
 }
 
 function moveVertical(dy: number) {
-  if (map[playery + dy][playerx].isFlux()
-    || map[playery + dy][playerx].isAir()) {
-    moveToTile(playerx, playery + dy);
-  } else if (map[playery + dy][playerx].isKey1()) {
-    remove(new RemoveLock1());
-    moveToTile(playerx, playery + dy);
-  } else if (map[playery + dy][playerx].isKey2()) {
-    remove(new RemoveLock2());
+  const nextTile = map[playery + dy][playerx];
+  if (nextTile.isFlux() || nextTile.isAir()) {
     moveToTile(playerx, playery + dy);
   }
+  if (nextTile.isKey()) {
+    nextTile.useKey();
+    moveToTile(playerx, playery + dy);
+  }
+
 }
 
 function update() {
