@@ -88,34 +88,6 @@ class Stone extends Tile {
   }
 }
 
-class FallingStone extends Tile {
-  private isFalling: boolean;
-
-  constructor(isFalling: boolean) {
-    super();
-    this.isFalling = isFalling;
-  }
-  
-  isFallingStone(): boolean {
-    return this.isFalling;
-  }
-  isStony(): boolean {
-    return true;
-  }
-
-  moveHorizontal(dx: number): void {
-    if (this.isFallingStone() === false) {
-      if (map[playery][playerx + dx + dx].isAir()
-            && !map[playery + 1][playerx + dx].isAir()) {
-        map[playery][playerx + dx + dx] = map[playery][playerx + dx];
-        moveToTile(playerx + dx, playery);
-      }
-    }
-    else if (this.isFallingStone() === true) {
-    }
-  }
-}
-
 class Box extends Tile {
   isBoxy(): boolean {
     return true;
@@ -238,7 +210,7 @@ function transformTile(tile: RawTile): Tile {
     case RawTile.PLAYER: return new Player();
     case RawTile.UNBREAKABLE: return new Unbreakable();
     case RawTile.STONE: return new Stone(false);
-    case RawTile.FALLING_STONE: return new FallingStone(true);
+    case RawTile.FALLING_STONE: return new Stone(true);
     case RawTile.BOX: return new Box();
     case RawTile.FALLING_BOX: return new FallingBox();
     case RawTile.FLUX: return new Flux();
@@ -312,7 +284,7 @@ function updateMap() {
 function updateTile(y: number, x: number) {
   if ((map[y][x].isStony())
     && map[y + 1][x].isAir()) {
-    map[y + 1][x] = new FallingStone(true);
+    map[y + 1][x] = new Stone(true);
     map[y][x] = new Air();
   } else if ((map[y][x].isBoxy())
     && map[y + 1][x].isAir()) {
