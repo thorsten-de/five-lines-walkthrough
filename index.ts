@@ -41,8 +41,6 @@ abstract class Tile {
   isFlux(): boolean { return false; }
   isUnbreakable(): boolean { return false; }
   isPlayer(): boolean { return false; }
-  isFallingStone(): boolean { return false; }
-  isFallingBox(): boolean { return false; }
   isKey1(): boolean { return false; }
   isKey2(): boolean { return false; }
   isLock1(): boolean { return false; }
@@ -105,10 +103,6 @@ class Stone extends Tile {
   isFalling(): boolean {
     return this.falling.isFalling();
   }
-
-  isFallingStone(): boolean {
-    return this.falling.isFalling();
-  }
  
   moveHorizontal(dx: number) {
     this.falling.moveHorizontal(this, dx);
@@ -125,10 +119,6 @@ class Box extends Tile {
   }
 
   isFalling(): boolean {
-    return this.falling.isFalling();
-  }
-
-  isFallingBox(): boolean {
     return this.falling.isFalling();
   }
 
