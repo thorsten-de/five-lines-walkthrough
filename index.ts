@@ -15,7 +15,7 @@ enum RawTile {
 }
 
 abstract class Tile {
-  isAir():boolean { return false; }
+  isAir(): boolean { return false; }
   isFlux(): boolean { return false; }
   isUnbreakable(): boolean { return false; }
   isPlayer(): boolean { return false; }
@@ -28,6 +28,8 @@ abstract class Tile {
   isLock1(): boolean { return false; }
   isLock2(): boolean { return false; }
 
+  isStony(): boolean { return false; }
+  isBoxy(): boolean { return false; }
   abstract moveHorizontal(dx: number): void;
 }
 
@@ -61,6 +63,9 @@ class Player extends Tile {
 
 class Stone extends Tile {
   isStone() { return true; }
+  isStony(): boolean {
+    return true;
+  }
  
   moveHorizontal(dx: number) {
     if (map[playery][playerx + dx + dx].isAir()
@@ -75,12 +80,18 @@ class FallingStone extends Tile {
   isFallingStone(): boolean {
     return true;
   }
+  isStony(): boolean {
+    return true;
+  }
 
   moveHorizontal(dx: number): void { }
 }
 
 class Box extends Tile {
   isBox(): boolean {
+    return true;
+  }
+  isBoxy(): boolean {
     return true;
   }
 
@@ -95,6 +106,9 @@ class Box extends Tile {
 
 class FallingBox extends Tile {
   isFallingBox(): boolean {
+    return true;
+  }
+  isBoxy(): boolean {
     return true;
   }
 
@@ -270,11 +284,11 @@ function updateMap() {
 }
 
 function updateTile(y: number, x: number) {
-  if ((map[y][x].isStone() || map[y][x].isFallingStone())
+  if ((map[y][x].isStony())
     && map[y + 1][x].isAir()) {
     map[y + 1][x] = new FallingStone();
     map[y][x] = new Air();
-  } else if ((map[y][x].isBox() || map[y][x].isFallingBox())
+  } else if ((map[y][x].isBoxy())
     && map[y + 1][x].isAir()) {
     map[y + 1][x] = new FallingBox();
     map[y][x] = new Air();
@@ -321,9 +335,9 @@ function colorOfTile(y: number, x: number, g: CanvasRenderingContext2D) {
     g.fillStyle = "#ccffcc";
   else if (map[y][x].isUnbreakable())
     g.fillStyle = "#999999";
-  else if (map[y][x].isStone() || map[y][x].isFallingStone())
+  else if (map[y][x].isStony())
     g.fillStyle = "#0000cc";
-  else if (map[y][x].isBox() || map[y][x].isFallingBox())
+  else if (map[y][x].isBoxy())
     g.fillStyle = "#8b4513";
   else if (map[y][x].isKey1() || map[y][x].isLock1())
     g.fillStyle = "#ffcc00";
