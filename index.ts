@@ -60,6 +60,13 @@ class Player extends Tile {
 }
 
 class Stone extends Tile {
+  private isFalling: boolean;
+
+  constructor() {
+    super();
+    this.isFalling = false;
+  }
+
   isStony(): boolean {
     return true;
   }
@@ -78,6 +85,13 @@ class Stone extends Tile {
 }
 
 class FallingStone extends Tile {
+  private isFalling: boolean;
+
+  constructor() {
+    super();
+    this.isFalling = true;
+  }
+  
   isFallingStone(): boolean {
     return true;
   }
