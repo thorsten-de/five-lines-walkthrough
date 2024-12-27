@@ -156,34 +156,21 @@ class Box extends Tile {
   }
 }
 
-class Key1 extends Tile {
-  isKey1(): boolean {
-    return true;
+class Key extends Tile {
+  constructor(
+    private color: string,
+    private removeStrategy: RemoveStrategy
+  )  {
+    super();
   }
 
   moveHorizontal(dx: number) {
-    remove(new RemoveLock1());
+    remove(this.removeStrategy);
     moveToTile(playerx + dx, playery);
   }
   
   override draw(g: CanvasRenderingContext2D, x: number, y: number): void {
-    g.fillStyle = "#ffcc00";
-    g.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-  }
-}
-
-class Key2 extends Tile {
-  isKey2(): boolean {
-    return true;
-  }
-   
-  moveHorizontal(dx: number) {
-    remove(new RemoveLock2())
-    moveToTile(playerx + dx, playery);
-  }
-
-  override draw(g: CanvasRenderingContext2D, x: number, y: number): void {
-    g.fillStyle = "#00ccff";
+    g.fillStyle = this.color;
     g.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
   }
 }
@@ -277,8 +264,8 @@ function transformTile(tile: RawTile): Tile {
     case RawTile.BOX: return new Box(new Resting());
     case RawTile.FALLING_BOX: return new Box(new Falling());
     case RawTile.FLUX: return new Flux();
-    case RawTile.KEY1: return new Key1();
-    case RawTile.KEY2: return new Key2();
+    case RawTile.KEY1: return new Key("#ffcc00", new RemoveLock1());
+    case RawTile.KEY2: return new Key("#00ccff", new RemoveLock2());
     case RawTile.LOCK1: return new Lock1();
     case RawTile.LOCK2: return new Lock2();
     default: assertExhausted(tile);
