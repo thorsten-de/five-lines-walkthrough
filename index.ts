@@ -37,7 +37,6 @@ enum RawTile {
 }
 
 abstract class Tile {
-  update(x: number, y: number): void {  }
   isAir(): boolean { return false; }
   isFlux(): boolean { return false; }
   isUnbreakable(): boolean { return false; }
@@ -49,12 +48,9 @@ abstract class Tile {
 
   isStony(): boolean { return false; }
   isBoxy(): boolean { return false; }
-  isFalling(): boolean { return false; }
-  canFall(): boolean {return false; }
 
+  update(x: number, y: number): void {  }
   abstract moveHorizontal(dx: number): void;
-  drop(): void { }
-  rest(): void { }
 }
 
 class Air extends Tile {
@@ -94,21 +90,12 @@ class Stone extends Tile {
     return true;
   }
 
-
   canFall(): boolean {
     return true;
   }
 
   isFalling(): boolean {
     return this.falling.isFalling();
-  }
-  
-  drop(): void {
-    this.falling = new Falling();
-  }
-
-  rest(): void {
-    this.falling = new Resting();
   }
 
   moveHorizontal(dx: number) {
@@ -143,20 +130,12 @@ class Box extends Tile {
     return this.falling.isFalling();
   }
 
-  drop(): void {
-    this.falling = new Falling();
-  }
-
-  rest(): void {
-    this.falling = new Resting();
-  }
-  
   moveHorizontal(dx: number) {
     this.falling.moveHorizontal(this, dx);
   }
 
   update(x: number, y: number): void {
-        if (map[y + 1][x].isAir()) {
+    if (map[y + 1][x].isAir()) {
       this.falling = new Falling();
       map[y+1][x] = this;
       map[y][x] = new Air();  
