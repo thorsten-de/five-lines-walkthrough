@@ -175,28 +175,25 @@ class Key extends Tile {
   }
 }
 
-class Lock1 extends Tile {
+class LockTile extends Tile {
+  constructor(
+    private color: string,
+    private lock1: boolean
+  ) {
+    super();
+  }
+
   isLock1(): boolean {
-    return true;
+    return this.lock1;
   }
-
-  moveHorizontal(dx: number) { }
-  
-  override draw(g: CanvasRenderingContext2D, x: number, y: number): void {
-    g.fillStyle = "#ffcc00";
-    g.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-  }
-}
-
-class Lock2 extends Tile {
   isLock2(): boolean {
-    return true;
+    return !this.lock1;
   }
 
   moveHorizontal(dx: number) { }
   
   override draw(g: CanvasRenderingContext2D, x: number, y: number): void {
-    g.fillStyle = "#00ccff";
+    g.fillStyle = this.color;
     g.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
   }
 }
@@ -266,8 +263,8 @@ function transformTile(tile: RawTile): Tile {
     case RawTile.FLUX: return new Flux();
     case RawTile.KEY1: return new Key("#ffcc00", new RemoveLock1());
     case RawTile.KEY2: return new Key("#00ccff", new RemoveLock2());
-    case RawTile.LOCK1: return new Lock1();
-    case RawTile.LOCK2: return new Lock2();
+    case RawTile.LOCK1: return new LockTile("#ffcc00", true);
+    case RawTile.LOCK2: return new LockTile("#00ccff", false);
     default: assertExhausted(tile);
   }
 }
