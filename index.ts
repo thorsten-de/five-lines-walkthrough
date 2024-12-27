@@ -60,11 +60,8 @@ class Player extends Tile {
 }
 
 class Stone extends Tile {
-  private isFalling: boolean;
-
-  constructor(isFalling: boolean) {
+  constructor(private falling: boolean) {
     super();
-    this.isFalling = isFalling;
   }
 
   isStony(): boolean {
@@ -72,7 +69,7 @@ class Stone extends Tile {
   }
 
   isFallingStone(): boolean {
-    return this.isFalling;
+    return this.falling;
   }
  
   moveHorizontal(dx: number) {
