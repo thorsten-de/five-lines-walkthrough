@@ -72,6 +72,7 @@ abstract class Tile {
 
   update(x: number, y: number): void {  }
   abstract moveHorizontal(dx: number): void;
+  abstract color(g: CanvasRenderingContext2D): void;
 }
 
 class Air extends Tile {
@@ -79,6 +80,9 @@ class Air extends Tile {
 
   moveHorizontal(dx: number) {
     moveToTile(playerx + dx, playery);
+  }
+
+  override color(g: CanvasRenderingContext2D): void {
   }
 }
 
@@ -88,18 +92,29 @@ class Flux extends Tile {
   moveHorizontal(dx: number) {
     moveToTile(playerx + dx, playery);
   }
+
+  override color(g: CanvasRenderingContext2D): void {
+    g.fillStyle = "#ccffcc";
+  }
 }
 
 class Unbreakable extends Tile {
   isUnbreakable() { return true; } 
 
   moveHorizontal(dx: number) {}
+
+  override color(g: CanvasRenderingContext2D): void {
+    g.fillStyle = "#999999";
+  }
 }
 
 class Player extends Tile {
   isPlayer() { return true; }
 
   moveHorizontal(dx: number) {}
+
+  override color(g: CanvasRenderingContext2D): void {
+  }
 }
 
 class Stone extends Tile {
@@ -131,6 +146,10 @@ class Stone extends Tile {
 
   update(x: number, y: number): void {
     this.fallStrategy.update(this,x, y);
+  }
+
+  override color(g: CanvasRenderingContext2D): void {
+    g.fillStyle = "#0000cc";
   }
 }
 
@@ -164,6 +183,10 @@ class Box extends Tile {
   update(x: number, y: number): void {
     this.fallStrategy.update(this, x, y);
   }
+
+  override color(g: CanvasRenderingContext2D): void {
+    g.fillStyle = "#8b4513";
+  }
 }
 
 class Key1 extends Tile {
@@ -174,6 +197,10 @@ class Key1 extends Tile {
   moveHorizontal(dx: number) {
     remove(new RemoveLock1());
     moveToTile(playerx + dx, playery);
+  }
+  
+  override color(g: CanvasRenderingContext2D): void {
+    g.fillStyle = "#ffcc00";
   }
 }
 
@@ -186,6 +213,10 @@ class Key2 extends Tile {
     remove(new RemoveLock2())
     moveToTile(playerx + dx, playery);
   }
+
+  override color(g: CanvasRenderingContext2D): void {
+    g.fillStyle = "#00ccff";
+  }
 }
 
 class Lock1 extends Tile {
@@ -193,7 +224,11 @@ class Lock1 extends Tile {
     return true;
   }
 
-   moveHorizontal(dx: number) { }
+  moveHorizontal(dx: number) { }
+  
+  override color(g: CanvasRenderingContext2D): void {
+    g.fillStyle = "#ffcc00";
+  }
 }
 
 class Lock2 extends Tile {
@@ -202,6 +237,10 @@ class Lock2 extends Tile {
   }
 
   moveHorizontal(dx: number) { }
+  
+  override color(g: CanvasRenderingContext2D): void {
+    g.fillStyle = "#00ccff";
+  }
 }
 
 enum RawInput {
@@ -377,18 +416,7 @@ function drawMap(g: CanvasRenderingContext2D) {
 }
 
 function colorOfTile(y: number, x: number, g: CanvasRenderingContext2D) {
-  if (map[y][x].isFlux())
-    g.fillStyle = "#ccffcc";
-  else if (map[y][x].isUnbreakable())
-    g.fillStyle = "#999999";
-  else if (map[y][x].isStony())
-    g.fillStyle = "#0000cc";
-  else if (map[y][x].isBoxy())
-    g.fillStyle = "#8b4513";
-  else if (map[y][x].isKey1() || map[y][x].isLock1())
-    g.fillStyle = "#ffcc00";
-  else if (map[y][x].isKey2() || map[y][x].isLock2())
-    g.fillStyle = "#00ccff";
+  map[y][x].color(g);
 }
 
 function drawPlayer(g: CanvasRenderingContext2D) {
