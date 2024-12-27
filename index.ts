@@ -65,7 +65,7 @@ class Stone extends Tile {
   }
  
   moveHorizontal(dx: number) {
-    if (true) {
+    if (this.isFallingStone() === false) {
       if (map[playery][playerx + dx + dx].isAir()
             && !map[playery + 1][playerx + dx].isAir()) {
         map[playery][playerx + dx + dx] = map[playery][playerx + dx];
@@ -84,7 +84,7 @@ class FallingStone extends Tile {
   }
 
   moveHorizontal(dx: number): void {
-    if (true) {
+    if (this.isFallingStone() === true) {
 
     }
   }
