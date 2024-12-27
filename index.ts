@@ -25,6 +25,9 @@ class Resting implements FallingState {
   isFalling() { return false; }
 }
 
+class FallStrategy {
+}
+
 enum RawTile {
   AIR,
   FLUX,
@@ -82,8 +85,10 @@ class Player extends Tile {
 }
 
 class Stone extends Tile {
+  private fallStrategy: FallStrategy;
   constructor(private falling: FallingState) {
     super();
+    this.fallStrategy = new FallStrategy();
   }
 
   isStony(): boolean {
@@ -114,8 +119,10 @@ class Stone extends Tile {
 }
 
 class Box extends Tile {
+  private fallStrategy: FallStrategy;
   constructor(private falling: FallingState) {
     super();
+    this.fallStrategy = new FallStrategy();
   }
 
   isBoxy(): boolean {
