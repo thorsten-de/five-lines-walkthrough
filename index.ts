@@ -100,28 +100,21 @@ class Stone extends Tile {
 }
 
 class Box extends Tile {
+  constructor(private falling: FallingState) {
+    super();
+  }
+
   isBoxy(): boolean {
     return true;
   }
 
-  moveHorizontal(dx: number) {
-    if (map[playery][playerx + dx + dx].isAir()
-        && !map[playery + 1][playerx + dx].isAir()) {
-      map[playery][playerx + dx + dx] = this;
-      moveToTile(playerx + dx, playery);
-    }
-  }
-}
-
-class FallingBox extends Tile {
   isFallingBox(): boolean {
-    return true;
+    return this.falling.isFalling();
   }
-  isBoxy(): boolean {
-    return true;
+  
+  moveHorizontal(dx: number) {
+    this.falling.moveHorizontal(this, dx);
   }
-
-  moveHorizontal(dx: number) { }
 }
 
 class Key1 extends Tile {
@@ -222,8 +215,8 @@ function transformTile(tile: RawTile): Tile {
     case RawTile.UNBREAKABLE: return new Unbreakable();
     case RawTile.STONE: return new Stone(new Falling());
     case RawTile.FALLING_STONE: return new Stone(new Resting());
-    case RawTile.BOX: return new Box();
-    case RawTile.FALLING_BOX: return new FallingBox();
+    case RawTile.BOX: return new Box(new Resting());
+    case RawTile.FALLING_BOX: return new Box(new Falling());
     case RawTile.FLUX: return new Flux();
     case RawTile.KEY1: return new Key1();
     case RawTile.KEY2: return new Key2();
@@ -299,12 +292,12 @@ function updateTile(y: number, x: number) {
     map[y][x] = new Air();
   } else if ((map[y][x].isBoxy())
     && map[y + 1][x].isAir()) {
-    map[y + 1][x] = new FallingBox();
+    map[y + 1][x] = new Box(new Falling());
     map[y][x] = new Air();
   } else if (map[y][x].isFallingStone()) {
     map[y][x] = new Stone(new Resting());
   } else if (map[y][x].isFallingBox()) {
-    map[y][x] = new Box();
+    map[y][x] = new Box(new Resting());
   }
 }
 
