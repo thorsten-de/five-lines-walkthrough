@@ -26,6 +26,10 @@ class Resting implements FallingState {
 }
 
 class FallStrategy {
+  constructor(private falling: FallingState) {
+  }
+
+  getFalling() { return this.falling; }
 
   update(x: number, y: number): void {
     if (map[y + 1][x].isAir()) {
@@ -96,9 +100,9 @@ class Player extends Tile {
 
 class Stone extends Tile {
   private fallStrategy: FallStrategy;
-  constructor(private falling: FallingState) {
+  constructor(falling: FallingState) {
     super();
-    this.fallStrategy = new FallStrategy();
+    this.fallStrategy = new FallStrategy(falling);
   }
 
   isStony(): boolean {
@@ -110,13 +114,17 @@ class Stone extends Tile {
   }
 
   isFalling(): boolean {
-    return this.falling.isFalling();
+    return this.fallStrategy
+      .getFalling()
+      .isFalling();
   }
 
   moveHorizontal(dx: number) {
-    this.falling.moveHorizontal(this, dx);
+    this.fallStrategy
+      .getFalling()
+      .moveHorizontal(this, dx);
   }
-  
+
   update(x: number, y: number): void {
     this.fallStrategy.update(x, y);
   }
@@ -124,9 +132,9 @@ class Stone extends Tile {
 
 class Box extends Tile {
   private fallStrategy: FallStrategy;
-  constructor(private falling: FallingState) {
+  constructor(falling: FallingState) {
     super();
-    this.fallStrategy = new FallStrategy();
+    this.fallStrategy = new FallStrategy(falling);
   }
 
   isBoxy(): boolean {
@@ -138,11 +146,15 @@ class Box extends Tile {
   }
 
   isFalling(): boolean {
-    return this.falling.isFalling();
+    return this.fallStrategy
+      .getFalling()
+      .isFalling();
   }
 
   moveHorizontal(dx: number) {
-    this.falling.moveHorizontal(this, dx);
+    this.fallStrategy
+      .getFalling()
+      .moveHorizontal(this, dx);
   }
 
   update(x: number, y: number): void {
