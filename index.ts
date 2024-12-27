@@ -36,9 +36,13 @@ class FallStrategy {
       ? new Falling()
       : new Resting();
     if (this.falling.isFalling()) {
-      map[y+1][x] = tile;
-      map[y][x] = new Air();  
+      this.drop(tile, x, y);  
     }    
+  }
+
+  private drop(tile: Tile, x: number, y: number) {
+    map[y + 1][x] = tile;
+    map[y][x] = new Air();
   }
 }
 
