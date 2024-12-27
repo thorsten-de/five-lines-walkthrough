@@ -50,6 +50,7 @@ abstract class Tile {
 
   isStony(): boolean { return false; }
   isBoxy(): boolean { return false; }
+  isFalling(): boolean { return false; }
 
   abstract moveHorizontal(dx: number): void;
   drop(): void { }
@@ -101,6 +102,10 @@ class Stone extends Tile {
     this.falling = new Resting();
   }
 
+  isFalling(): boolean {
+    return this.falling.isFalling();
+  }
+
   isFallingStone(): boolean {
     return this.falling.isFalling();
   }
@@ -117,6 +122,10 @@ class Box extends Tile {
 
   isBoxy(): boolean {
     return true;
+  }
+
+  isFalling(): boolean {
+    return this.falling.isFalling();
   }
 
   isFallingBox(): boolean {
@@ -313,7 +322,7 @@ function updateTile(y: number, x: number) {
     && map[y + 1][x].isAir()) {
     map[y + 1][x] = new Box(new Falling());
     map[y][x] = new Air();
-  } else if (map[y][x].isFallingStone() || map[y][x].isFallingBox()) {
+  } else if (map[y][x].isFalling()) {
     map[y][x].rest();
   }
 }
