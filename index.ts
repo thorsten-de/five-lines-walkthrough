@@ -37,6 +37,7 @@ enum RawTile {
 }
 
 abstract class Tile {
+  update(x: number, y: number): void {  }
   isAir(): boolean { return false; }
   isFlux(): boolean { return false; }
   isUnbreakable(): boolean { return false; }
@@ -113,6 +114,16 @@ class Stone extends Tile {
   moveHorizontal(dx: number) {
     this.falling.moveHorizontal(this, dx);
   }
+
+  update(x: number, y: number): void {
+    if (map[y + 1][x].isAir()) {
+      this.falling = new Falling();
+      map[y+1][x] = this;
+      map[y][x] = new Air();  
+    } else if (this.falling.isFalling()) {
+      this.falling = new Resting();
+    }
+  }
 }
 
 class Box extends Tile {
@@ -142,6 +153,16 @@ class Box extends Tile {
   
   moveHorizontal(dx: number) {
     this.falling.moveHorizontal(this, dx);
+  }
+
+  update(x: number, y: number): void {
+        if (map[y + 1][x].isAir()) {
+      this.falling = new Falling();
+      map[y+1][x] = this;
+      map[y][x] = new Air();  
+    } else if (this.falling.isFalling()) {
+      this.falling = new Resting();
+    }
   }
 }
 
@@ -314,14 +335,7 @@ function updateMap() {
 }
 
 function updateTile(y: number, x: number) {
-  if (map[y][x].canFall() && map[y + 1][x].isAir())
-  {
-    map[y][x].drop();
-    map[y+1][x] = map[y][x]
-    map[y][x] = new Air();  
-  } else if (map[y][x].isFalling()) {
-    map[y][x].rest();
-  }
+  map[y][x].update(x, y);
 }
 
 function handleInputs() {
