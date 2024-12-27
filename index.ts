@@ -70,6 +70,10 @@ class Stone extends Tile {
   isStony(): boolean {
     return true;
   }
+  
+  isFallingStone(): boolean {
+    return this.isFalling;
+  }
  
   moveHorizontal(dx: number) {
     if (this.isFallingStone() === false) {
@@ -93,7 +97,7 @@ class FallingStone extends Tile {
   }
   
   isFallingStone(): boolean {
-    return true;
+    return this.isFalling;
   }
   isStony(): boolean {
     return true;
