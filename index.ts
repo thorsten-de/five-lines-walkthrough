@@ -31,10 +31,10 @@ class FallStrategy {
 
   getFalling() { return this.falling; }
 
-  update(x: number, y: number): void {
+  update(tile: Tile, x: number, y: number): void {
     if (map[y + 1][x].isAir()) {
       this.falling = new Falling();
-      map[y+1][x] = this;
+      map[y+1][x] = tile;
       map[y][x] = new Air();  
     } else if (this.falling.isFalling()) {
       this.falling = new Resting();
@@ -126,7 +126,7 @@ class Stone extends Tile {
   }
 
   update(x: number, y: number): void {
-    this.fallStrategy.update(x, y);
+    this.fallStrategy.update(this,x, y);
   }
 }
 
@@ -158,7 +158,7 @@ class Box extends Tile {
   }
 
   update(x: number, y: number): void {
-    this.fallStrategy.update(x, y);
+    this.fallStrategy.update(this, x, y);
   }
 }
 
