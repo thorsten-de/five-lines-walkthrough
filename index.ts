@@ -60,15 +60,10 @@ enum RawTile {
 abstract class Tile {
   isAir(): boolean { return false; }
   isFlux(): boolean { return false; }
-  isUnbreakable(): boolean { return false; }
-  isPlayer(): boolean { return false; }
   isKey1(): boolean { return false; }
   isKey2(): boolean { return false; }
   isLock1(): boolean { return false; }
   isLock2(): boolean { return false; }
-
-  isStony(): boolean { return false; }
-  isBoxy(): boolean { return false; }
 
   update(x: number, y: number): void {  }
   abstract moveHorizontal(dx: number): void;
@@ -100,8 +95,6 @@ class Flux extends Tile {
 }
 
 class Unbreakable extends Tile {
-  isUnbreakable() { return true; } 
-
   moveHorizontal(dx: number) {}
 
   override draw(g: CanvasRenderingContext2D, x: number, y: number): void {
@@ -111,8 +104,6 @@ class Unbreakable extends Tile {
 }
 
 class Player extends Tile {
-  isPlayer() { return true; }
-
   moveHorizontal(dx: number) {}
 
   override draw(g: CanvasRenderingContext2D, x: number, y: number): void {
@@ -124,20 +115,6 @@ class Stone extends Tile {
   constructor(falling: FallingState) {
     super();
     this.fallStrategy = new FallStrategy(falling);
-  }
-
-  isStony(): boolean {
-    return true;
-  }
-
-  canFall(): boolean {
-    return true;
-  }
-
-  isFalling(): boolean {
-    return this.fallStrategy
-      .getFalling()
-      .isFalling();
   }
 
   moveHorizontal(dx: number) {
@@ -161,20 +138,6 @@ class Box extends Tile {
   constructor(falling: FallingState) {
     super();
     this.fallStrategy = new FallStrategy(falling);
-  }
-
-  isBoxy(): boolean {
-    return true;
-  }
-
-  canFall(): boolean {
-    return true;
-  }
-
-  isFalling(): boolean {
-    return this.fallStrategy
-      .getFalling()
-      .isFalling();
   }
 
   moveHorizontal(dx: number) {
@@ -349,7 +312,6 @@ function remove(shouldRemove: RemoveStrategy) {
     }
   }
 }
-
 
 function moveToTile(newx: number, newy: number) {
   map[playery][playerx] = new Air();
