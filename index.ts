@@ -73,8 +73,6 @@ enum RawTile {
 
 abstract class Tile {
   isAir(): boolean { return false; }
-  isFlux(): boolean { return false; }
-  isKey(): boolean { return false; }
   useKey(): void { }
   fits(key_id: number): boolean { return false; }
 
@@ -100,8 +98,6 @@ class Air extends Tile {
 }
 
 class Flux extends Tile {
-  isFlux() { return true ; }
-  
   moveHorizontal(dx: number) {
     moveToTile(playerx + dx, playery);
   }
