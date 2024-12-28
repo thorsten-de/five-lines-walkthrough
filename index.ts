@@ -174,6 +174,7 @@ class Box extends Tile {
 }
 
 class KeyConfiguration {
+
   private removeStrategy: RemoveStrategy;
   constructor(
     private color: string,
@@ -182,8 +183,10 @@ class KeyConfiguration {
     this.removeStrategy = new RemoveIdLock(key_id);
   }
 
-  getKeyId() { return this.key_id; }
-  getColor() { return this.color; }
+  getKeyId() { return this.key_id; }  
+  setColor(g: CanvasRenderingContext2D) {
+    g.fillStyle = this.color;
+  }
   unlock() {
     remove(this.removeStrategy);
   }
@@ -205,7 +208,7 @@ class Key extends Tile {
   }
   
   override draw(g: CanvasRenderingContext2D, x: number, y: number): void {
-    g.fillStyle = this.configuration.getColor();
+    this.configuration.setColor(g);
     g.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
   }
 }
@@ -222,7 +225,7 @@ class LockTile extends Tile {
   moveHorizontal(dx: number) { }
   
   override draw(g: CanvasRenderingContext2D, x: number, y: number): void {
-    g.fillStyle = this.configuration.getColor();
+    this.configuration.setColor(g);
     g.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
   }
 }
