@@ -121,7 +121,7 @@ class Unbreakable extends Tile {
   }
 }
 
-class Player extends Tile {
+class PlayerTile extends Tile {
   moveHorizontal(dx: number) {}
 
   override draw(g: CanvasRenderingContext2D, x: number, y: number): void {
@@ -290,7 +290,7 @@ const OHTER_KEY = new KeyConfiguration("#00ccff", 2);
 function transformTile(tile: RawTile): Tile {
   switch (tile) {
     case RawTile.AIR: return new Air();
-    case RawTile.PLAYER: return new Player();
+    case RawTile.PLAYER: return new PlayerTile();
     case RawTile.UNBREAKABLE: return new Unbreakable();
     case RawTile.STONE: return new Stone(new Falling());
     case RawTile.FALLING_STONE: return new Stone(new Resting());
@@ -319,7 +319,7 @@ function remove(shouldRemove: RemoveStrategy) {
 
 function moveToTile(newx: number, newy: number) {
   map[playery][playerx] = new Air();
-  map[newy][newx] = new Player();
+  map[newy][newx] = new PlayerTile();
   playerx = newx;
   playery = newy;
 }
