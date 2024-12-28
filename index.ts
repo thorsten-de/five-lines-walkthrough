@@ -29,7 +29,9 @@ class FallStrategy {
   constructor(private falling: FallingState) {
   }
 
-  getFalling() { return this.falling; }
+  moveHorizontal(tile: Tile, dx: number): void {
+    return this.falling.moveHorizontal(tile, dx);
+  }
 
   update(tile: Tile, x: number, y: number): void {
     this.falling = map[y + 1][x].isAir() 
@@ -136,7 +138,6 @@ class Stone extends Tile {
 
   moveHorizontal(dx: number) {
     this.fallStrategy
-      .getFalling()
       .moveHorizontal(this, dx);
   }
 
@@ -159,7 +160,6 @@ class Box extends Tile {
 
   moveHorizontal(dx: number) {
     this.fallStrategy
-      .getFalling()
       .moveHorizontal(this, dx);
   }
 
