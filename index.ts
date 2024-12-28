@@ -4,13 +4,16 @@ const FPS = 30;
 const SLEEP = 1000 / FPS;
 
 interface FallingState {
-  isFalling(): boolean
-  moveHorizontal(tile: Tile, dx: number):void
+  drop(tile: Tile, x: number, y: number): void
+  moveHorizontal(tile: Tile, dx: number): void
 }
 
 class Falling implements FallingState {
-  isFalling() { return true;  }
   moveHorizontal(tile: Tile, dx: number): void {    
+  }
+  drop(tile: Tile, x: number, y: number) {
+    map[y + 1][x] = tile;
+    map[y][x] = new Air();
   }
 }
 
@@ -22,7 +25,7 @@ class Resting implements FallingState {
         moveToTile(playerx + dx, playery);
       }
   }
-  isFalling() { return false; }
+  drop(tile: Tile, x: number, y: number): void { }
 }
 
 class FallStrategy {
@@ -34,17 +37,8 @@ class FallStrategy {
   }
 
   update(tile: Tile, x: number, y: number): void {
-    this.falling = map[y + 1][x].isAir() 
-      ? new Falling()
-      : new Resting();
-    if (this.falling.isFalling()) {
-      this.drop(tile, x, y);  
-    }    
-  }
-
-  private drop(tile: Tile, x: number, y: number) {
-    map[y + 1][x] = tile;
-    map[y][x] = new Air();
+    this.falling = map[y + 1][x].getBlockOnTopState();
+    this.falling.drop(tile, x, y);
   }
 }
 
@@ -76,6 +70,7 @@ enum RawTile {
 abstract class Tile {
   isAir(): boolean { return false; }
   fits(key_id: number): boolean { return false; }
+  getBlockOnTopState(): FallingState { return new Resting(); }
 
   update(x: number, y: number): void {  }
   moveVertical(dy: number): void { }
@@ -85,6 +80,10 @@ abstract class Tile {
 
 class Air extends Tile {
   isAir() { return true; }
+
+  override getBlockOnTopState(): FallingState {
+    return new Falling();
+  }
 
   moveHorizontal(dx: number) {
     moveToTile(playerx + dx, playery);
