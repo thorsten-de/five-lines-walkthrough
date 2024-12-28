@@ -73,7 +73,6 @@ enum RawTile {
 
 abstract class Tile {
   isAir(): boolean { return false; }
-  useKey(): void { }
   fits(key_id: number): boolean { return false; }
 
   update(x: number, y: number): void {  }
@@ -196,22 +195,18 @@ class Key extends Tile {
   }
 
   moveVertical(dy: number): void {
-    this.useKey();
+    this.configuration.unlock()
     moveToTile(playerx, playery + dy);
   }
 
   moveHorizontal(dx: number) {
-    this.useKey();
+    this.configuration.unlock()
     moveToTile(playerx + dx, playery);
   }
   
   override draw(g: CanvasRenderingContext2D, x: number, y: number): void {
     g.fillStyle = this.configuration.getColor();
     g.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-  }
-
-  override useKey(): void {
-    this.configuration.unlock()
   }
 }
 
