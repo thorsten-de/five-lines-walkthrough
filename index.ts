@@ -185,7 +185,9 @@ class KeyConfiguration {
 
   getKeyId() { return this.key_id; }
   getColor() { return this.color; }
-  getRemoveStrategy() { return this.removeStrategy; }
+  unlock() {
+    remove(this.removeStrategy);
+  }
 }
 
 class Key extends Tile {
@@ -209,7 +211,7 @@ class Key extends Tile {
   }
 
   override useKey(): void {
-    remove(this.configuration.getRemoveStrategy());
+    this.configuration.unlock()
   }
 }
 
