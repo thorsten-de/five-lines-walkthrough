@@ -183,12 +183,14 @@ class KeyConfiguration {
     this.removeStrategy = new RemoveIdLock(key_id);
   }
 
-  getKeyId() { return this.key_id; }  
   setColor(g: CanvasRenderingContext2D) {
     g.fillStyle = this.color;
   }
   unlock() {
     remove(this.removeStrategy);
+  }
+  fits(key_id: number): boolean {
+    return this.key_id === key_id;
   }
 }
 
@@ -219,7 +221,7 @@ class LockTile extends Tile {
   }
 
   fits(key_id: number): boolean {
-    return this.configuration.getKeyId() === key_id;
+    return this.configuration.fits(key_id);
   }
 
   moveHorizontal(dx: number) { }
