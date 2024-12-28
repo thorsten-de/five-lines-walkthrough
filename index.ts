@@ -263,6 +263,8 @@ class Down implements Input {
   }
 }
 
+class Player {}
+
 let playerx = 1;
 let playery = 1;
 let rawMap: RawTile[][] = [
