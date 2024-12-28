@@ -79,6 +79,7 @@ abstract class Tile {
   fits(key_id: number): boolean { return false; }
 
   update(x: number, y: number): void {  }
+  moveVertical(dy: number): void { }
   abstract moveHorizontal(dx: number): void;
   abstract draw(g: CanvasRenderingContext2D, x: number, y: number): void;
 }
@@ -90,6 +91,10 @@ class Air extends Tile {
     moveToTile(playerx + dx, playery);
   }
 
+  moveVertical(dy: number): void {
+    moveToTile(playerx, playery + dy);
+  }
+
   override draw(g: CanvasRenderingContext2D, x: number, y: number): void {
   }
 }
@@ -99,6 +104,10 @@ class Flux extends Tile {
   
   moveHorizontal(dx: number) {
     moveToTile(playerx + dx, playery);
+  }
+
+  moveVertical(dy: number): void {
+    moveToTile(playerx, playery + dy);
   }
 
   override draw(g: CanvasRenderingContext2D, x: number, y: number): void {
@@ -186,6 +195,11 @@ class KeyConfiguration {
 class Key extends Tile {
   constructor(private configuration: KeyConfiguration) {
     super();
+  }
+
+  moveVertical(dy: number): void {
+    this.useKey();
+    moveToTile(playerx, playery + dy);
   }
 
   moveHorizontal(dx: number) {
@@ -318,15 +332,7 @@ function moveHorizontal(dx: number) {
 }
 
 function moveVertical(dy: number) {
-  const nextTile = map[playery + dy][playerx];
-  if (nextTile.isFlux() || nextTile.isAir()) {
-    moveToTile(playerx, playery + dy);
-  }
-  if (nextTile.isKey()) {
-    nextTile.useKey();
-    moveToTile(playerx, playery + dy);
-  }
-
+  map[playery + dy][playerx].moveVertical(dy);
 }
 
 function update() {
