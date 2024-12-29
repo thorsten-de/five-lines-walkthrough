@@ -17,7 +17,6 @@ class Falling implements FallingState {
   }
 }
 
-let player: Player;
 
 class Resting implements FallingState {
   moveHorizontal(tile: Tile, dx: number): void {
@@ -267,8 +266,8 @@ class Down implements Input {
 
 class Player {
   constructor(
-    private x = 1,
-    private y = 1,    
+    private x: number,
+    private y: number
   ) { }
 
   getX = () => this.x;
@@ -276,11 +275,12 @@ class Player {
   setX = (value: number) => this.x = value;
   setY = (value: number) => this.y = value;
 
-  drawPlayer(g: CanvasRenderingContext2D) {
+  draw(g: CanvasRenderingContext2D) {
     g.fillStyle = "#ff0000";
     g.fillRect(this.x * TILE_SIZE, this.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
   }
 }
+let player: Player = new Player(1,1);
 
 let rawMap: RawTile[][] = [
   [2, 2, 2, 2, 2, 2, 2, 2],
@@ -346,7 +346,7 @@ function moveHorizontal(dx: number) {
 }
 
 function moveVertical(dy: number) {
-  map[player.getY(),  dy][player.getX()].moveVertical(dy);
+  map[player.getY() + dy][player.getX()].moveVertical(dy);
 }
 
 function update() {
@@ -377,6 +377,10 @@ function draw() {
   let g = createGraphics();
   drawMap(g);
   drawPlayer(g);
+}
+
+function drawPlayer(g: CanvasRenderingContext2D) {
+  player.draw(g);
 }
 
 function createGraphics() {
