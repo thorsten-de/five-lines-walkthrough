@@ -20,11 +20,7 @@ class Falling implements FallingState {
 
 class Resting implements FallingState {
   moveHorizontal(player: Player, tile: Tile, dx: number): void {
-    if (map[player.getY() ][player.getX() + dx + dx].isAir()
-            && !map[player.getY() + 1][player.getX() + dx].isAir()) {
-        map[player.getY()][player.getX() + dx + dx] = tile;
-        moveToTile(player, player.getX() + dx, player.getY());
-      }
+    player.pushHorizontal(tile, dx);
   }
   drop(tile: Tile, x: number, y: number): void { }
 }
@@ -87,11 +83,11 @@ class Air extends Tile {
   }
 
   moveHorizontal(player: Player, dx: number) {
-    moveToTile(player, player.getX() + dx, player.getY());
+    player.move(dx, 0);
   }
 
   moveVertical(player: Player, dy: number): void {
-    moveToTile(player, player.getX(), player.getY() + dy);
+    player.move(0, dy);
   }
 
   override draw(g: CanvasRenderingContext2D, x: number, y: number): void {
@@ -100,11 +96,11 @@ class Air extends Tile {
 
 class Flux extends Tile {
   moveHorizontal(player: Player, dx: number) {
-    moveToTile(player, player.getX() + dx, player.getY());
+    player.move(dx, 0);
   }
 
   moveVertical(player: Player, dy: number): void {
-    moveToTile(player, player.getX(), player.getY() + dy);
+    player.move(0, dy);
   }
 
   override draw(g: CanvasRenderingContext2D, x: number, y: number): void {
@@ -201,12 +197,12 @@ class Key extends Tile {
 
   moveVertical(player: Player, dy: number): void {
     this.configuration.unlock()
-    moveToTile(player, player.getX(), player.getY() + dy);
+    player.move(0, dy);
   }
 
   moveHorizontal(player: Player, dx: number) {
     this.configuration.unlock()
-    moveToTile(player, player.getX() + dx, player.getY());
+    player.move(dx, 0);
   }
   
   override draw(g: CanvasRenderingContext2D, x: number, y: number): void {
@@ -242,25 +238,25 @@ interface Input {
 
 class Right implements Input {
   handle(player: Player) {
-    moveHorizontal(player, 1);
+    player.moveHorizontal(1);
   }
 }
 
 class Left implements Input {
   handle(player: Player) {
-    moveHorizontal(player, -1);
+    player.moveHorizontal(-1);
   }
 }
 
 class Up implements Input {
   handle(player: Player) {
-    moveVertical(player, -1);
+    player.moveVertical(-1);
   }
 }
 
 class Down implements Input {
   handle(player: Player) {
-    moveVertical(player, 1);
+    player.moveVertical(1);
   }
 }
 
@@ -270,17 +266,39 @@ class Player {
     private y: number
   ) { }
 
-  getX = () => this.x;
-  getY = () => this.y;
-  setX = (value: number) => this.x = value;
-  setY = (value: number) => this.y = value;
-
   draw(g: CanvasRenderingContext2D) {
     g.fillStyle = "#ff0000";
     g.fillRect(this.x * TILE_SIZE, this.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
   }
+
+  pushHorizontal(tile: Tile, dx: number) {
+    if (map[this.y][this.x + dx + dx].isAir()
+            && !map[this.y + 1][this.x + dx].isAir()) {
+      map[this.y][this.x + dx + dx] = tile;
+      this.moveToTile(this.x + dx, this.y);
+    }
+  }
+  
+  moveHorizontal(dx: number) {
+    map[this.y][this.x + dx].moveHorizontal(player, dx);
+  }
+
+  moveVertical(dy: number) {
+    map[this.y + dy][this.x].moveVertical(player, dy);
+  }
+
+
+  move(dx: number, dy: number) {
+    this.moveToTile(this.x + dx, this.y + dy);
+  }
+
+  private moveToTile(newx: number, newy: number) {
+    map[this.y][this.x] = new Air();
+    map[newy][newx] = new PlayerTile();
+    this.x = newx;
+    this.y = newy;
+  }
 }
-// let player: Player = new Player(1,1);
 
 let rawMap: RawTile[][] = [
   [2, 2, 2, 2, 2, 2, 2, 2],
@@ -335,20 +353,6 @@ function remove(shouldRemove: RemoveStrategy) {
   }
 }
 
-function moveToTile(player: Player, newx: number, newy: number) {
-  map[player.getY()][player.getX()] = new Air();
-  map[newy][newx] = new PlayerTile();
-  player.setX(newx);
-  player.setY(newy);
-}
-
-function moveHorizontal(player: Player, dx: number) {
-  map[player.getY()][player.getX() + dx].moveHorizontal(player, dx);
-}
-
-function moveVertical(player: Player, dy: number) {
-  map[player.getY() + dy][player.getX()].moveVertical(player, dy);
-}
 
 function update(player: Player) {
   handleInputs(player);
