@@ -301,7 +301,11 @@ class Player {
 }
 
 class Map {
+  constructor(
+    private map: Tile[][]
+  ) {}
 
+  getMap = () => this.map;
 }
 
 let rawMap: RawTile[][] = [
@@ -313,7 +317,6 @@ let rawMap: RawTile[][] = [
   [2, 2, 2, 2, 2, 2, 2, 2],
 ];
 
-let map: Tile[][];
 
 function transformMap() {
   map = rawMap.map(row => row.map(transformTile));
