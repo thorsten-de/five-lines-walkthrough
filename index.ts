@@ -52,32 +52,20 @@ class RemoveIdLock implements RemoveStrategy {
   }
 }
 
-enum RawTile {
-  AIR,
-  FLUX,
-  UNBREAKABLE,
-  PLAYER,
-  STONE, FALLING_STONE,
-  BOX, FALLING_BOX,
-  KEY1, LOCK1,
-  KEY2, LOCK2
-}
-
-const TILE_CREATORS : Object = {
-  0: (map: Map) => new Air(map),
-  1: (map: Map) =>  new Air(map),
-  2: (map: Map) => new PlayerTile(map),
-  3: (map: Map) => new Unbreakable(map),
-  4: (map: Map) => new Stone(map, new Falling()),
-  5: (map: Map) => new Stone(map, new Resting()),
-  6: (map: Map) => new Box(map, new Resting()),
-  7: (map: Map) => new Box(map, new Falling()),
-  8: (map: Map) => new Flux(map),
-  9: (map: Map) => new Key(map, YELLOW_KEY),
-  10: (map: Map) => new Key(map, OHTER_KEY),
-  11: (map: Map) => new LockTile(map, YELLOW_KEY),
-  12: (map: Map) => new LockTile(map, OHTER_KEY),
-}
+const TILE_CREATORS = [
+  (map: Map) => new Air(map),
+  (map: Map) => new Flux(map),
+  (map: Map) => new Unbreakable(map),
+  (map: Map) => new PlayerTile(map),
+  (map: Map) => new Stone(map, new Falling()),
+  (map: Map) => new Stone(map, new Resting()),
+  (map: Map) => new Box(map, new Resting()),
+  (map: Map) => new Box(map, new Falling()),
+  (map: Map) => new Key(map, YELLOW_KEY),
+  (map: Map) => new LockTile(map, YELLOW_KEY),
+  (map: Map) => new Key(map, OHTER_KEY),
+  (map: Map) => new LockTile(map, OHTER_KEY),
+];
 
 abstract class Tile {
   constructor(
@@ -303,7 +291,6 @@ class Player {
     this.map.moveVertical(this, this.x, this.y, dy);
   }
 
-
   move(dx: number, dy: number) {
     this.moveToTile(this.x + dx, this.y + dy);
   }
@@ -318,34 +305,12 @@ class Player {
 class Map {
   private map: Tile[][];
 
-  static FromTiles(tiles: RawTile[][]): Map {
-    let newMap = new Map();
-    newMap.map = newMap.transform(tiles);
-    return newMap;
-  }
+  constructor(tiles: number[][]){ 
+    this.map = this.transform(tiles);
+   }
 
-  private constructor(){  }
-
-  private transform(tiles: RawTile[][]): Tile[][] {
-    return tiles.map(row => row.map(tile => Map.transformTile(this, tile)));
-  }
-
-  private static transformTile(map: Map, tile: RawTile): Tile {
-    switch (tile) {
-      case RawTile.AIR: return new Air(map);
-      case RawTile.PLAYER: return new PlayerTile(map)
-      case RawTile.UNBREAKABLE: return new Unbreakable(map);
-      case RawTile.STONE: return new Stone(map, new Falling());
-      case RawTile.FALLING_STONE: return new Stone(map, new Resting());
-      case RawTile.BOX: return new Box(map, new Resting());
-      case RawTile.FALLING_BOX: return new Box(map, new Falling());
-      case RawTile.FLUX: return new Flux(map);
-      case RawTile.KEY1: return new Key(map, YELLOW_KEY);
-      case RawTile.KEY2: return new Key(map, OHTER_KEY);
-      case RawTile.LOCK1: return new LockTile(map, YELLOW_KEY);
-      case RawTile.LOCK2: return new LockTile(map, OHTER_KEY);
-      default: assertExhausted(tile);
-    }
+  private transform(tiles: number[][]): Tile[][] {
+    return tiles.map(row => row.map(value => TILE_CREATORS[value](this)));
   }
 
   remove(shouldRemove: RemoveStrategy) {
@@ -405,7 +370,7 @@ class Map {
   }
 }
 
-let rawMap: RawTile[][] = [
+let rawMap: number[][] = [
   [2, 2, 2, 2, 2, 2, 2, 2],
   [2, 3, 0, 1, 1, 2, 0, 2],
   [2, 4, 2, 6, 1, 2, 0, 2],
@@ -413,12 +378,6 @@ let rawMap: RawTile[][] = [
   [2, 4, 1, 1, 1, 9, 0, 2],
   [2, 2, 2, 2, 2, 2, 2, 2],
 ];
-
-
-function assertExhausted(x: never): never {
-  throw new Error("Unexpected object: " + x);
-}
-
 const YELLOW_KEY = new KeyConfiguration("#ffcc00", 1);
 const OHTER_KEY = new KeyConfiguration("#00ccff", 2);
 
@@ -461,7 +420,7 @@ function gameLoop(player: Player, map: Map) {
 }
 
 window.onload = () => {
-  let map : Map  = Map.FromTiles(rawMap);
+  let map : Map = new Map(rawMap);
   let player: Player = new Player(map, 1, 1);
   gameLoop(player, map);
 }
