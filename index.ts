@@ -300,6 +300,10 @@ class Player {
   }
 }
 
+class Map {
+
+}
+
 let rawMap: RawTile[][] = [
   [2, 2, 2, 2, 2, 2, 2, 2],
   [2, 3, 0, 1, 1, 2, 0, 2],
