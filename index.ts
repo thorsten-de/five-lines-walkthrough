@@ -4,25 +4,24 @@ const FPS = 30;
 const SLEEP = 1000 / FPS;
 
 interface FallingState {
-  drop(tile: Tile, x: number, y: number): void
+  drop(map: Map, tile: Tile, x: number, y: number): void
   moveHorizontal(player: Player, tile: Tile, dx: number): void
 }
 
 class Falling implements FallingState {
   moveHorizontal(player: Player, tile: Tile, dx: number): void {    
   }
-  drop(tile: Tile, x: number, y: number) {
-    map[y + 1][x] = tile;
-    map[y][x] = new Air();
+
+  drop(map: Map, tile: Tile, x: number, y: number) {
+    map.drop(tile, x, y);
   }
 }
-
 
 class Resting implements FallingState {
   moveHorizontal(player: Player, tile: Tile, dx: number): void {
     player.pushHorizontal(tile, dx);
   }
-  drop(tile: Tile, x: number, y: number): void { }
+  drop(map: Map, tile: Tile, x: number, y: number): void { }
 }
 
 class FallStrategy {
@@ -33,9 +32,9 @@ class FallStrategy {
     return this.falling.moveHorizontal(player, tile, dx);
   }
 
-  update(tile: Tile, x: number, y: number): void {
-    this.falling = map[y + 1][x].getBlockOnTopState();
-    this.falling.drop(tile, x, y);
+  update(map: Map, tile: Tile, x: number, y: number): void {
+    this.falling = map.getBlockOnTopState(x, y);
+    this.falling.drop(map, tile, x, y);
   }
 }
 
@@ -64,7 +63,27 @@ enum RawTile {
   KEY2, LOCK2
 }
 
+const TILE_CREATORS : Object = {
+  0: (map: Map) => new Air(map),
+  1: (map: Map) =>  new Air(map),
+  2: (map: Map) => new PlayerTile(map),
+  3: (map: Map) => new Unbreakable(map),
+  4: (map: Map) => new Stone(map, new Falling()),
+  5: (map: Map) => new Stone(map, new Resting()),
+  6: (map: Map) => new Box(map, new Resting()),
+  7: (map: Map) => new Box(map, new Falling()),
+  8: (map: Map) => new Flux(map),
+  9: (map: Map) => new Key(map, YELLOW_KEY),
+  10: (map: Map) => new Key(map, OHTER_KEY),
+  11: (map: Map) => new LockTile(map, YELLOW_KEY),
+  12: (map: Map) => new LockTile(map, OHTER_KEY),
+}
+
 abstract class Tile {
+  constructor(
+    protected map: Map
+  ){}
+
   isAir(): boolean { return false; }
   fits(key_id: number): boolean { return false; }
   getBlockOnTopState(): FallingState { return new Resting(); }
@@ -127,8 +146,8 @@ class PlayerTile extends Tile {
 
 class Stone extends Tile {
   private fallStrategy: FallStrategy;
-  constructor(falling: FallingState) {
-    super();
+  constructor(map: Map, falling: FallingState) {
+    super(map);
     this.fallStrategy = new FallStrategy(falling);
   }
 
@@ -138,7 +157,7 @@ class Stone extends Tile {
   }
 
   update(x: number, y: number): void {
-    this.fallStrategy.update(this,x, y);
+    this.fallStrategy.update(this.map, this,x, y);
   }
 
   override draw(g: CanvasRenderingContext2D, x: number, y: number): void {
@@ -149,8 +168,8 @@ class Stone extends Tile {
 
 class Box extends Tile {
   private fallStrategy: FallStrategy;
-  constructor(falling: FallingState) {
-    super();
+  constructor(map: Map, falling: FallingState) {
+    super(map);
     this.fallStrategy = new FallStrategy(falling);
   }
 
@@ -160,7 +179,7 @@ class Box extends Tile {
   }
 
   update(x: number, y: number): void {
-    this.fallStrategy.update(this, x, y);
+    this.fallStrategy.update(this.map, this, x, y);
   }
 
   override draw(g: CanvasRenderingContext2D, x: number, y: number): void {
@@ -182,8 +201,8 @@ class KeyConfiguration {
   setColor(g: CanvasRenderingContext2D) {
     g.fillStyle = this.color;
   }
-  unlock() {
-    remove(this.removeStrategy);
+  unlock(map: Map) {
+    map.remove(this.removeStrategy);
   }
   fits(key_id: number): boolean {
     return this.key_id === key_id;
@@ -191,17 +210,17 @@ class KeyConfiguration {
 }
 
 class Key extends Tile {
-  constructor(private configuration: KeyConfiguration) {
-    super();
+  constructor(map: Map, private configuration: KeyConfiguration) {
+    super(map);
   }
 
   moveVertical(player: Player, dy: number): void {
-    this.configuration.unlock()
+    this.configuration.unlock(this.map)
     player.move(0, dy);
   }
 
   moveHorizontal(player: Player, dx: number) {
-    this.configuration.unlock()
+    this.configuration.unlock(this.map)
     player.move(dx, 0);
   }
   
@@ -212,8 +231,8 @@ class Key extends Tile {
 }
 
 class LockTile extends Tile {
-  constructor(private configuration: KeyConfiguration) {
-    super();
+  constructor(map: Map, private configuration: KeyConfiguration) {
+    super(map);
   }
 
   fits(key_id: number): boolean {
@@ -262,6 +281,7 @@ class Down implements Input {
 
 class Player {
   constructor(
+    private map: Map,
     private x: number,
     private y: number
   ) { }
@@ -272,19 +292,15 @@ class Player {
   }
 
   pushHorizontal(tile: Tile, dx: number) {
-    if (map[this.y][this.x + dx + dx].isAir()
-            && !map[this.y + 1][this.x + dx].isAir()) {
-      map[this.y][this.x + dx + dx] = tile;
-      this.moveToTile(this.x + dx, this.y);
-    }
+    this.map.pushHorizontal(this, this.x, this.y, tile, dx);
   }
   
   moveHorizontal(dx: number) {
-    map[this.y][this.x + dx].moveHorizontal(player, dx);
+    this.map.moveHorizontal(this, this.x, this.y, dx);
   }
 
   moveVertical(dy: number) {
-    map[this.y + dy][this.x].moveVertical(player, dy);
+    this.map.moveVertical(this, this.x, this.y, dy);
   }
 
 
@@ -292,20 +308,101 @@ class Player {
     this.moveToTile(this.x + dx, this.y + dy);
   }
 
-  private moveToTile(newx: number, newy: number) {
-    map[this.y][this.x] = new Air();
-    map[newy][newx] = new PlayerTile();
+  moveToTile(newx: number, newy: number) {
+    this.map.movePlayer(this.x, this.y, newx, newy)
     this.x = newx;
     this.y = newy;
   }
 }
 
 class Map {
-  constructor(
-    private map: Tile[][]
-  ) {}
+  private map: Tile[][];
 
-  getMap = () => this.map;
+  static FromTiles(tiles: RawTile[][]): Map {
+    let newMap = new Map();
+    newMap.map = newMap.transform(tiles);
+    return newMap;
+  }
+
+  private constructor(){  }
+
+  private transform(tiles: RawTile[][]): Tile[][] {
+    return tiles.map(row => row.map(tile => Map.transformTile(this, tile)));
+  }
+
+  private static transformTile(map: Map, tile: RawTile): Tile {
+    switch (tile) {
+      case RawTile.AIR: return new Air(map);
+      case RawTile.PLAYER: return new PlayerTile(map)
+      case RawTile.UNBREAKABLE: return new Unbreakable(map);
+      case RawTile.STONE: return new Stone(map, new Falling());
+      case RawTile.FALLING_STONE: return new Stone(map, new Resting());
+      case RawTile.BOX: return new Box(map, new Resting());
+      case RawTile.FALLING_BOX: return new Box(map, new Falling());
+      case RawTile.FLUX: return new Flux(map);
+      case RawTile.KEY1: return new Key(map, YELLOW_KEY);
+      case RawTile.KEY2: return new Key(map, OHTER_KEY);
+      case RawTile.LOCK1: return new LockTile(map, YELLOW_KEY);
+      case RawTile.LOCK2: return new LockTile(map, OHTER_KEY);
+      default: assertExhausted(tile);
+    }
+  }
+
+  remove(shouldRemove: RemoveStrategy) {
+    for (let y = 0; y < this.map.length; y++) {
+      for (let x = 0; x < this.map[y].length; x++) {
+        if (shouldRemove.check(this.map[y][x])) {
+          this.map[y][x] = new Air(this);
+        }
+      }
+    }
+  }
+
+  update() {
+    for (let y = this.map.length - 1; y >= 0; y--) {
+      for (let x = 0; x < this.map[y].length; x++) {
+        this.map[y][x].update(x, y);
+      }
+    }
+  }
+
+  draw(g: CanvasRenderingContext2D) {
+    for (let y = 0; y < this.map.length; y++) {
+      for (let x = 0; x < this.map[y].length; x++) {
+        this.map[y][x].draw(g, x, y);
+      }
+    }
+  }
+
+  movePlayer(x: number, y: number, newx: number, newy: number) {
+    this.map[y][x] = new Air(this);
+    this.map[newy][newx] = new PlayerTile(this);
+  }
+
+  moveHorizontal(player: Player, x: number, y: number, dx: number) {
+    this.map[y][x + dx].moveHorizontal(player, dx);
+  }
+
+  moveVertical(player: Player, x: number, y: number, dy: number) {
+    this.map[y + dy][x].moveVertical(player, dy);
+  }
+
+  pushHorizontal(player: Player, x: number, y: number, tile: Tile, dx: number) {
+    if (this.map[y][x + dx + dx].isAir()
+            && !this.map[y + 1][x + dx].isAir()) {
+      this.map[y][x + dx + dx] = tile;
+      player.moveToTile(x + dx, y);
+    }
+  }
+
+  drop(tile: Tile, x: number, y: number) {
+    this.map[y + 1][x] = tile;
+    this.map[y][x] = new Air(this);
+  }
+
+  getBlockOnTopState(x: number, y: number) {
+    return this.map[y + 1][x].getBlockOnTopState();
+  }
 }
 
 let rawMap: RawTile[][] = [
@@ -318,10 +415,6 @@ let rawMap: RawTile[][] = [
 ];
 
 
-function transformMap() {
-  map = rawMap.map(row => row.map(transformTile));
-}
-
 function assertExhausted(x: never): never {
   throw new Error("Unexpected object: " + x);
 }
@@ -329,53 +422,11 @@ function assertExhausted(x: never): never {
 const YELLOW_KEY = new KeyConfiguration("#ffcc00", 1);
 const OHTER_KEY = new KeyConfiguration("#00ccff", 2);
 
-function transformTile(tile: RawTile): Tile {
-  switch (tile) {
-    case RawTile.AIR: return new Air();
-    case RawTile.PLAYER: return new PlayerTile();
-    case RawTile.UNBREAKABLE: return new Unbreakable();
-    case RawTile.STONE: return new Stone(new Falling());
-    case RawTile.FALLING_STONE: return new Stone(new Resting());
-    case RawTile.BOX: return new Box(new Resting());
-    case RawTile.FALLING_BOX: return new Box(new Falling());
-    case RawTile.FLUX: return new Flux();
-    case RawTile.KEY1: return new Key(YELLOW_KEY);
-    case RawTile.KEY2: return new Key(OHTER_KEY);
-    case RawTile.LOCK1: return new LockTile(YELLOW_KEY);
-    case RawTile.LOCK2: return new LockTile(OHTER_KEY);
-    default: assertExhausted(tile);
-  }
-}
-
 let inputs: Input[] = [];
-let player: Player = new Player(1, 1);
 
-function remove(shouldRemove: RemoveStrategy) {
-  for (let y = 0; y < map.length; y++) {
-    for (let x = 0; x < map[y].length; x++) {
-      if (shouldRemove.check(map[y][x])) {
-        map[y][x] = new Air();
-      }
-    }
-  }
-}
-
-
-function update(player: Player) {
+function update(player: Player, map: Map) {
   handleInputs(player);
-  updateMap();
-}
-
-function updateMap() {
-  for (let y = map.length - 1; y >= 0; y--) {
-    for (let x = 0; x < map[y].length; x++) {
-      updateTile(y, x);
-    }
-  }
-}
-
-function updateTile(y: number, x: number) {
-  map[y][x].update(x, y);
+  map.update();
 }
 
 function handleInputs(player: Player) {
@@ -385,13 +436,9 @@ function handleInputs(player: Player) {
   }
 }
 
-function draw(player: Player) {
+function draw(player: Player, map: Map) {
   let g = createGraphics();
-  drawMap(g);
-  drawPlayer(player, g);
-}
-
-function drawPlayer(player: Player, g: CanvasRenderingContext2D) {
+  map.draw(g);
   player.draw(g);
 }
 
@@ -403,27 +450,20 @@ function createGraphics() {
   return g;
 }
 
-function drawMap(g: CanvasRenderingContext2D) {
-  for (let y = 0; y < map.length; y++) {
-    for (let x = 0; x < map[y].length; x++) {
-      map[y][x].draw(g, x, y);
-    }
-  }
-}
-
-function gameLoop(player: Player) {
+function gameLoop(player: Player, map: Map) {
   let before = Date.now();
-  update(player);
-  draw(player);
+  update(player, map);
+  draw(player, map);
   let after = Date.now();
   let frameTime = after - before;
   let sleep = SLEEP - frameTime;
-  setTimeout(() => gameLoop(player), sleep);
+  setTimeout(() => gameLoop(player, map), sleep);
 }
 
 window.onload = () => {
-  transformMap();
-  gameLoop(player);
+  let map : Map  = Map.FromTiles(rawMap);
+  let player: Player = new Player(map, 1, 1);
+  gameLoop(player, map);
 }
 
 const LEFT_KEY = "ArrowLeft";
@@ -436,4 +476,3 @@ window.addEventListener("keydown", e => {
   else if (e.key === RIGHT_KEY || e.key === "d") inputs.push(new Right());
   else if (e.key === DOWN_KEY || e.key === "s") inputs.push(new Down());
 });
-
